@@ -108,15 +108,27 @@ namespace Hi_Life_API_FixedAssets
                             /// CRM關聯實體     縣市      new_storeinformation
                             /// CRM關聯欄位     名稱      new_name
                             /// 
-                            var temp = from e in storeInformationList where e["new_name"].ToString() == cell.NumericCellValue.ToString() select e.Id;
-                            recordGuid = temp.First();
-                            if (recordGuid == Guid.Empty)
+                            var value = row.GetCell(0).CellType == CellType.Numeric ? row.GetCell(0).NumericCellValue.ToString() : row.GetCell(0).StringCellValue;
+                            var temp = from e in storeInformationList where e["new_name"].ToString() == value select e.Id;
+                            if (!temp.Any())
                             {
-                                EnvironmentSetting.ErrorMsg = "CRM 查無相符合資料 : \n";
-                                EnvironmentSetting.ErrorMsg += "\tCRM實體 : new_storeinformation\n";
-                                Console.WriteLine(EnvironmentSetting.ErrorMsg);
-                                return TransactionStatus.Fail;
+                                try
+                                {
+                                    Entity storeinformation = new Entity("new_storeinformation");
+                                    storeinformation["new_name"] = cell.NumericCellValue.ToString();
+                                    storeinformation["new_storename"] = row.GetCell(i + 1).StringCellValue;
+                                    recordGuid = service.Create(storeinformation);
+                                    storeInformationList = Lookup.RetrieveEntityAllRecord("new_storeinformation", new String[] { "new_name" });
+                                }
+                                catch
+                                {
+                                    EnvironmentSetting.ErrorMsg = "CRM 建立門市資訊失敗";
+                                    Console.WriteLine(EnvironmentSetting.ErrorMsg);
+                                    return TransactionStatus.Fail;
+                                }
                             }
+                            else
+                                recordGuid = temp.First();
                             entity[fieldArray[i]] = new EntityReference("new_storeinformation", recordGuid);
                         }
                         else if (i == 45)
@@ -245,6 +257,7 @@ namespace Hi_Life_API_FixedAssets
             }
             catch (Exception ex)
             {
+                Console.WriteLine(row.GetCell(0).StringCellValue);
                 Console.WriteLine("欄位讀取錯誤");
                 Console.WriteLine(ex.Message);
                 EnvironmentSetting.ErrorMsg = "欄位讀取錯誤\n" + ex.Message;

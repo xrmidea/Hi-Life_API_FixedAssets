@@ -51,48 +51,64 @@ namespace Hi_Life_API_FixedAssets
                             if (sheet.GetRow(i) != null) //null is when the row only contains empty cells 
                             {
                                 var row = sheet.GetRow(i);
-                                Guid existId = model.IsExist(row.GetCell(0).StringCellValue);
-                                if (EnvironmentSetting.ErrorType == ErrorType.None)
+                                if (row.GetCell(0) == null)
                                 {
-                                    TransactionStatus transactionStatus;
-                                    TransactionType transactionType;
-                                    if (existId == Guid.Empty)
+                                    dataSync.CreateDataSyncDetailForCRM("第" + i + "列key值為空", "N/A", TransactionType.Insert, TransactionStatus.Fail);
+                                    fail++;
+                                }
+                                else
+                                {
+                                    Guid existId = model.IsExist(row.GetCell(0).StringCellValue);
+                                    if (EnvironmentSetting.ErrorType == ErrorType.None)
                                     {
-                                        //create product
-                                        transactionType = TransactionType.Insert;
-                                        transactionStatus = model.CreateForCRM(row);
+                                        TransactionStatus transactionStatus;
+                                        TransactionType transactionType;
+                                        if (existId == Guid.Empty)
+                                        {
+                                            //create product
+                                            transactionType = TransactionType.Insert;
+                                            transactionStatus = model.CreateForCRM(row);
+                                        }
+                                        else
+                                        {
+                                            //update product
+                                            transactionType = TransactionType.Update;
+                                            transactionStatus = model.UpdateForCRM(row, existId);
+                                        }
+
+                                        //create datasyncdetail
+                                        if (EnvironmentSetting.ErrorType == ErrorType.None)
+                                        {
+                                            switch (transactionStatus)
+                                            {
+                                                case TransactionStatus.Success:
+                                                    success++;
+                                                    break;
+                                                case TransactionStatus.Fail:
+                                                    //新增、更新資料有錯誤 則新增一筆detail
+                                                    dataSync.CreateDataSyncDetailForCRM(row.GetCell(0).StringCellValue, row.GetCell(0).StringCellValue, transactionType, transactionStatus);
+                                                    fail++;
+                                                    break;
+                                                default:
+                                                    fail++;
+                                                    break;
+                                            }
+
+                                            //新增detail錯誤 則結束
+                                            if (EnvironmentSetting.ErrorType != ErrorType.None)
+                                            {
+                                                _logger.Info(EnvironmentSetting.ErrorMsg);
+                                                break;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            break;
+                                        }
                                     }
                                     else
                                     {
-                                        //update product
-                                        transactionType = TransactionType.Update;
-                                        transactionStatus = model.UpdateForCRM(row, existId);
-                                    }
-
-                                    //create datasyncdetail
-                                    if (EnvironmentSetting.ErrorType == ErrorType.None)
-                                    {
-                                        switch (transactionStatus)
-                                        {
-                                            case TransactionStatus.Success:
-                                                success++;
-                                                break;
-                                            case TransactionStatus.Fail:
-                                                //新增、更新資料有錯誤 則新增一筆detail
-                                                dataSync.CreateDataSyncDetailForCRM(row.GetCell(0).StringCellValue, row.GetCell(0).StringCellValue, transactionType, transactionStatus);
-                                                fail++;
-                                                break;
-                                            default:
-                                                fail++;
-                                                break;
-                                        }
-
-                                        //新增detail錯誤 則結束
-                                        if (EnvironmentSetting.ErrorType != ErrorType.None)
-                                        {
-                                            _logger.Info(EnvironmentSetting.ErrorMsg);
-                                            break;
-                                        }
+                                        break;
                                     }
                                 }
                             }
