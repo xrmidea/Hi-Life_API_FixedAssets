@@ -53,12 +53,12 @@ namespace Hi_Life_API_FixedAssets
                                 var row = sheet.GetRow(i);
                                 if (row.GetCell(0) == null)
                                 {
-                                    dataSync.CreateDataSyncDetailForCRM("第" + i + "列key值為空", "N/A", TransactionType.Insert, TransactionStatus.Fail);
+                                    dataSync.CreateDataSyncDetailForCRM("N/A", "第" + i + "列key值為空", TransactionType.Insert, TransactionStatus.Fail);
                                     fail++;
                                 }
                                 else
                                 {
-                                    Guid existId = model.IsExist(row.GetCell(0).StringCellValue);
+                                    Guid existId = model.IsExist(row.GetCell(0).ToString());
                                     if (EnvironmentSetting.ErrorType == ErrorType.None)
                                     {
                                         TransactionStatus transactionStatus;
@@ -86,7 +86,7 @@ namespace Hi_Life_API_FixedAssets
                                                     break;
                                                 case TransactionStatus.Fail:
                                                     //新增、更新資料有錯誤 則新增一筆detail
-                                                    dataSync.CreateDataSyncDetailForCRM(row.GetCell(0).StringCellValue, row.GetCell(0).StringCellValue, transactionType, transactionStatus);
+                                                    dataSync.CreateDataSyncDetailForCRM(row.GetCell(0).ToString(), row.GetCell(1).ToString(), transactionType, transactionStatus);
                                                     fail++;
                                                     break;
                                                 default:

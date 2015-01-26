@@ -108,15 +108,14 @@ namespace Hi_Life_API_FixedAssets
                             /// CRM關聯實體     縣市      new_storeinformation
                             /// CRM關聯欄位     名稱      new_name
                             /// 
-                            var value = row.GetCell(0).CellType == CellType.Numeric ? row.GetCell(0).NumericCellValue.ToString() : row.GetCell(0).StringCellValue;
-                            var temp = from e in storeInformationList where e["new_name"].ToString() == value select e.Id;
+                            var temp = from e in storeInformationList where e["new_name"].ToString() == cell.ToString() select e.Id;
                             if (!temp.Any())
                             {
                                 try
                                 {
                                     Entity storeinformation = new Entity("new_storeinformation");
-                                    storeinformation["new_name"] = cell.NumericCellValue.ToString();
-                                    storeinformation["new_storename"] = row.GetCell(i + 1).StringCellValue;
+                                    storeinformation["new_name"] = cell.ToString();
+                                    storeinformation["new_storename"] = row.GetCell(i + 1).ToString();
                                     recordGuid = service.Create(storeinformation);
                                     storeInformationList = Lookup.RetrieveEntityAllRecord("new_storeinformation", new String[] { "new_name" });
                                 }
@@ -161,7 +160,7 @@ namespace Hi_Life_API_FixedAssets
                         }
                         else if (i == 3)
                         {
-                            optionValue = OptionSet.getOptionSetValue(new_29, cell.StringCellValue);
+                            optionValue = OptionSet.getOptionSetValue(new_29, cell.ToString());
                             if (optionValue == -1)
                                 entity[fieldArray[i]] = null;
                             else
@@ -169,7 +168,7 @@ namespace Hi_Life_API_FixedAssets
                         }
                         else if (i == 16)
                         {
-                            optionValue = OptionSet.getOptionSetValue(new_15, cell.NumericCellValue.ToString());
+                            optionValue = OptionSet.getOptionSetValue(new_15, cell.ToString());
                             if (optionValue == -1)
                                 entity[fieldArray[i]] = null;
                             else
@@ -177,7 +176,7 @@ namespace Hi_Life_API_FixedAssets
                         }
                         else if (i == 19)
                         {
-                            optionValue = OptionSet.getOptionSetValue(new_2, cell.StringCellValue);
+                            optionValue = OptionSet.getOptionSetValue(new_2, cell.ToString());
                             if (optionValue == -1)
                                 entity[fieldArray[i]] = null;
                             else
@@ -185,7 +184,7 @@ namespace Hi_Life_API_FixedAssets
                         }
                         else if (i == 25)
                         {
-                            optionValue = OptionSet.getOptionSetValue(new_13, cell.StringCellValue);
+                            optionValue = OptionSet.getOptionSetValue(new_13, cell.ToString());
                             if (optionValue == -1)
                                 entity[fieldArray[i]] = null;
                             else
@@ -193,7 +192,7 @@ namespace Hi_Life_API_FixedAssets
                         }
                         else if (i == 26)
                         {
-                            optionValue = OptionSet.getOptionSetValue(new_9, cell.StringCellValue);
+                            optionValue = OptionSet.getOptionSetValue(new_9, cell.ToString());
                             if (optionValue == -1)
                                 entity[fieldArray[i]] = null;
                             else
@@ -201,7 +200,7 @@ namespace Hi_Life_API_FixedAssets
                         }
                         else if (i == 29)
                         {
-                            optionValue = OptionSet.getOptionSetValue(new_11, cell.StringCellValue);
+                            optionValue = OptionSet.getOptionSetValue(new_11, cell.ToString());
                             if (optionValue == -1)
                                 entity[fieldArray[i]] = null;
                             else
@@ -209,7 +208,7 @@ namespace Hi_Life_API_FixedAssets
                         }
                         else if (i == 32)
                         {
-                            optionValue = OptionSet.getOptionSetValue(new_7, cell.StringCellValue);
+                            optionValue = OptionSet.getOptionSetValue(new_7, cell.ToString());
                             if (optionValue == -1)
                                 entity[fieldArray[i]] = null;
                             else
@@ -217,22 +216,19 @@ namespace Hi_Life_API_FixedAssets
                         }
                         else if (i == 4 || i == 27 || i == 30 || i == 31 || i == 33 || i == 44 || i == 51)
                         {
-                            entity[fieldArray[i]] = new Money(Convert.ToDecimal(cell.NumericCellValue));
+                            entity[fieldArray[i]] = new Money(Convert.ToDecimal(cell.ToString()));
                         }
                         else if (i == 18 || i == 28)
                         {
-                            entity[fieldArray[i]] = Convert.ToDecimal(cell.NumericCellValue);
+                            entity[fieldArray[i]] = Convert.ToDecimal(cell.ToString());
                         }
                         else if (i == 10 || i == 35 || i == 36 || i == 54 || i == 55 || i == 56)
                         {
-                            entity[fieldArray[i]] = Convert.ToInt32(cell.NumericCellValue);
+                            entity[fieldArray[i]] = Convert.ToInt32(cell.ToString());
                         }
                         else
                         {
-                            if (cell.CellType == CellType.Numeric)
-                                entity[fieldArray[i]] = cell.NumericCellValue.ToString();
-                            else
-                                entity[fieldArray[i]] = cell.StringCellValue;
+                            entity[fieldArray[i]] = cell.ToString();
                         }
                     }
                 }
@@ -249,7 +245,7 @@ namespace Hi_Life_API_FixedAssets
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("資產編號 : " + row.GetCell(0).StringCellValue);
+                    Console.WriteLine("資產編號 : " + row.GetCell(0).ToString());
                     Console.WriteLine(ex.Message);
                     EnvironmentSetting.ErrorMsg = ex.Message;
                     return TransactionStatus.Fail;
@@ -257,7 +253,7 @@ namespace Hi_Life_API_FixedAssets
             }
             catch (Exception ex)
             {
-                Console.WriteLine(row.GetCell(0).StringCellValue);
+                Console.WriteLine(row.GetCell(0).ToString());
                 Console.WriteLine("欄位讀取錯誤");
                 Console.WriteLine(ex.Message);
                 EnvironmentSetting.ErrorMsg = "欄位讀取錯誤\n" + ex.Message;
